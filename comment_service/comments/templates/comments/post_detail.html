@@ -1,0 +1,43 @@
+{% extends 'comments/base_blog.html' %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-6 offset-md-2">
+            {%block content%}
+                <h1 class="mb-5">Post detail</h1>
+                <p>{{ user.username }}</p>
+                <p>{{ post.title }}</p> 
+                <p>{{ post.body }}</p>
+                {{ post.comments.all }}
+                {{post.get_content_type}}
+                <h1>Комментарии:</h1>
+                    <form method="post" action="."> {% csrf_token %}
+                        {{ comment_form }}
+                        <input class="btn btn-default" type='submit' value="Оставить комментарий">
+                    </form> 
+                    <hr/>
+                    {% for comment in comments %}
+                    
+                    <blockquote>
+                        <p>{{ comment.content }}</p>
+                        <footer>Автор: {{ comment.user }}</footer>
+                        <footer>Дата создания: {{ comment.timestamp|date }}</footer>
+                        {% for child_comment in comment.children %}
+                        <blockquote>
+                            <p>{{ child_comment.content }}</p>
+                            <footer>Автор: {{ child_comment.user }}</footer>
+                            <footer>Дата создания: {{ child_comment.timestamp|date }}</footer>
+                        </blockquote>
+                        {% endfor %}
+                        <form method="post" action="."> {% csrf_token %}
+                            {{ comment_form }}
+                            <input type='hidden' name='parent_id' value='{{ comment.id }}'>
+                            <input class="btn btn-default" type='submit' value="Ответить">
+                        </form> 
+                    </blockquote>
+                    <hr/>
+                    {% endfor %}
+            {% endblock %}
+        </div>
+    </div>
+</div> 
