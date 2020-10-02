@@ -12,6 +12,24 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def post_detail(request, slug=None): # Comment form with replies
     post = get_object_or_404(Post, slug=slug)
     comments = Comment.objects.filter_by_instance(post)
+
+    paginator = Paginator(comments, 2)
+
+    page_number = request.GET.get('page', 1)
+    page = paginator.get_page(page_number)
+
+    is_paginated = page.has_other_pages()
+
+    if page.has_previous():
+        prev_url = '?page={}'.format(page.previous_page_number())
+    else:
+        prev_url = ''
+
+    if page.has_next():
+        next_url = '?page={}'.format(page.next_page_number())
+    else:
+        next_url = ''
+
     initial_data = {
         "content_type": post.get_content_type,
         "object_id": post.id
@@ -43,8 +61,11 @@ def post_detail(request, slug=None): # Comment form with replies
     comments=post.comments
     return render(request, 'comments/post_detail.html', context={
         'post': post,
-        'comments': comments,
-        'comment_form': form
+        'comments': page,
+        'comment_form': form,
+        'is_paginated': is_paginated,
+        'prev_url': prev_url,
+        'next_url': next_url
     })
 
 def posts_list(request): # Listing all Post objects
