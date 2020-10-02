@@ -1,12 +1,15 @@
+import csv
 from .forms import CommentForm
 from .models import Post, Comment
-from django.views.generic import View
-from django.http import HttpResponseRedirect
+from django.views.generic import View, ListView
+from djqscsv import render_to_csv_response
+from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.contrib.contenttypes.models import ContentType
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-def post_detail(request, slug=None):
+def post_detail(request, slug=None): # Comment form with replies
     post = get_object_or_404(Post, slug=slug)
     comments = Comment.objects.filter_by_instance(post)
     initial_data = {
@@ -44,6 +47,19 @@ def post_detail(request, slug=None):
         'comment_form': form
     })
 
-def posts_list(request):
+def posts_list(request): # Listing all Post objects
     posts = Post.objects.all()
     return render(request, 'comments/index.html', {'posts': posts})
+
+
+
+def export(request): # Export Comment objects into csv file 
+    response = HttpResponse(content_type='text/csv')
+    writer = csv.writer(response)
+    writer.writerow(['user', 'parent_id', 'content', 'timestamp'])
+
+    comments = Comment.objects.all().values_list('user', 'parent_id', 'content', 'timestamp')
+    for comment in comments:
+        writer.writerow(comment)
+    response['Content-Disposition'] = 'attachment; filename="comments.csv"'
+    return response

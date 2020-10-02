@@ -4,6 +4,7 @@
     <div class="row">
         <div class="col-6 offset-md-2">
             {%block content%}
+            <h4 class='mt-4'><a href="{% url 'comments:export_comments'%}">Export all comments</a></h4>
                 <h1 class="mb-5">Post detail</h1>
                 <p>{{ user.username }}</p>
                 <p>{{ post.title }}</p> 
