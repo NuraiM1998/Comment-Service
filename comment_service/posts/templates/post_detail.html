@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+<div class="container">
+    <div class="row">
+        <div class="col-6 offset-md-2">
+            {%block content%}
+            <h1 class="mb-5">Post Detail</h1>
+                {{ object.date_pub }}
+                {{ object.title }}
+                {{ object.body }}
+                <form method="post" action=".">
+                    {% csrf_token %}
+                    <h3>Add a comment</h3>
+                    {{ comment_form.as_p }}
+                    <input type="hidden" name="entry" value="{{ object.pk }}">
+                    <p><input type="submit"></p>
+                </form>
+            {% endblock %}
+        </div>
+    </div>
+</div> 

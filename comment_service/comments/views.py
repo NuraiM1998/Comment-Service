@@ -1,121 +1,124 @@
 import csv
 import xlwt
-from .forms import CommentForm
+# from .forms import CommentForm
 import datetime
-from .models import Post, Comment
-from django.views.generic import View, ListView
+from .models import Comment
+from django.views.generic.list import ListView
+from django.views.generic.detail import DetailView
 from djqscsv import render_to_csv_response
-from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404
-from django.contrib.contenttypes.models import ContentType
+from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-def post_detail(request, slug=None): # Comment form with replies
-    post = get_object_or_404(Post, slug=slug)
-    comments = Comment.objects.filter_by_instance(post)
+# def post_detail(request, slug=None): # Comment form with replies
+#     post = get_object_or_404(Post, slug=slug)
+#     comments = Comment.objects.filter_by_instance(post)
 
-    paginator = Paginator(comments, 2)
+#     paginator = Paginator(comments, 2)
 
-    page_number = request.GET.get('page', 1)
-    page = paginator.get_page(page_number)
+#     page_number = request.GET.get('page', 1)
+#     page = paginator.get_page(page_number)
 
-    is_paginated = page.has_other_pages()
+#     is_paginated = page.has_other_pages()
 
-    if page.has_previous():
-        prev_url = '?page={}'.format(page.previous_page_number())
-    else:
-        prev_url = ''
+#     if page.has_previous():
+#         prev_url = '?page={}'.format(page.previous_page_number())
+#     else:
+#         prev_url = ''
 
-    if page.has_next():
-        next_url = '?page={}'.format(page.next_page_number())
-    else:
-        next_url = ''
+#     if page.has_next():
+#         next_url = '?page={}'.format(page.next_page_number())
+#     else:
+#         next_url = ''
 
-    initial_data = {
-        "content_type": post.get_content_type,
-        "object_id": post.id
-    }
-    form = CommentForm(request.POST or None, initial=initial_data)
-    if form.is_valid():
-        c_type = form.cleaned_data.get("content_type")
-        print(c_type)
-        obj_id = form.cleaned_data.get("object_id")
-        content_data = form.cleaned_data.get("content")
-        parent_obj = None
-        try:
-            parent_id = int(request.POST.get('parent_id'))
-        except:
-            parent_id = None
-        if parent_id:
-            parent_qs = Comment.objects.filter(id=parent_id)
-            if parent_qs.exists() and parent_qs.count() == 1:
-                parent_obj = parent_qs.first() 
-        content_type = ContentType.objects.get(model=c_type)
-        new_comment, created = Comment.objects.get_or_create(
-                            user=request.user,
-                            content_type=content_type,
-                            object_id=obj_id,
-                            content=content_data,
-                            parent=parent_obj
-                        )
-        return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
-    comments=post.comments
-    return render(request, 'comments/post_detail.html', context={
-        'post': post,
-        'comments': page,
-        'comment_form': form,
-        'is_paginated': is_paginated,
-        'prev_url': prev_url,
-        'next_url': next_url
-    })
+#     initial_data = {
+#         "content_type": post.get_content_type,
+#         "object_id": post.id
+#     }
 
-def posts_list(request): # Listing all Post objects
-    posts = Post.objects.all()
-    return render(request, 'comments/index.html', {'posts': posts})
+#     form = CommentForm(request.POST or None, initial=initial_data)
+#     if form.is_valid():
+#         c_type = form.cleaned_data.get("content_type")
+#         print(c_type)
+#         obj_id = form.cleaned_data.get("object_id")
+#         content_data = form.cleaned_data.get("content")
+#         parent_obj = None
+#         try:
+#             parent_id = int(request.POST.get('parent_id'))
+#         except:
+#             parent_id = None
+#         if parent_id:
+#             parent_qs = Comment.objects.filter(id=parent_id)
+#             if parent_qs.exists() and parent_qs.count() == 1:
+#                 parent_obj = parent_qs.first() 
+#         content_type = ContentType.objects.get(model=c_type)
+#         new_comment, created = Comment.objects.get_or_create(
+#                             user=request.user,
+#                             content_type=content_type,
+#                             object_id=obj_id,
+#                             content=content_data,
+#                             parent=parent_obj
+#                         )
+#         return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
 
+#     comments=post.comments
+
+#     return render(request, 'comments/post_detail.html', context={
+#         'post': post,
+#         'comments': page,
+#         'comment_form': form,
+#         'is_paginated': is_paginated,
+#         'prev_url': prev_url,
+#         'next_url': next_url
+#     })
 
 
-def export(request): # Export Comment objects into csv file 
-    response = HttpResponse(content_type='text/csv')
-    writer = csv.writer(response)
-    writer.writerow(['user', 'parent_id', 'content', 'timestamp'])
-
-    comments = Comment.objects.all().values_list('user', 'parent_id', 'content', 'timestamp')
-    for comment in comments:
-        writer.writerow(comment)
-    response['Content-Disposition'] = 'attachment; filename="comments.csv"'
-    return response
+# def posts_list(request): # Listing all Post objects
+#     posts = Post.objects.all()
+#     return render(request, 'comments/index.html', {'posts': posts})
 
 
-def export_comments_xls(request):
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="comments.xls"'
+# def export(request): # Export Comment objects into csv file 
+#     response = HttpResponse(content_type='text/csv')
+#     writer = csv.writer(response)
+#     writer.writerow(['user', 'parent_id', 'content', 'timestamp'])
 
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Comments Data') # this will make a sheet named Comments Data
+#     comments = Comment.objects.all().values_list('user', 'parent_id', 'content', 'timestamp')
+#     for comment in comments:
+#         writer.writerow(comment)
+#     response['Content-Disposition'] = 'attachment; filename="comments.csv"'
+#     return response
 
-    # Sheet header, first row
-    row_num = 0
 
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
+# def export_comments_xls(request):
+#     response = HttpResponse(content_type='application/ms-excel')
+#     response['Content-Disposition'] = 'attachment; filename="comments.xls"'
 
-    columns = ['user', 'parent_id', 'content', 'timestamp']
+#     wb = xlwt.Workbook(encoding='utf-8')
+#     ws = wb.add_sheet('Comments Data') # this will make a sheet named Comments Data
 
-    for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style) # at 0 row 0 column 
+#     # Sheet header, first row
+#     row_num = 0
 
-    # Sheet body, remaining rows
-    font_style = xlwt.XFStyle()
+#     font_style = xlwt.XFStyle()
+#     font_style.font.bold = True
 
-    rows = Comment.objects.all().values_list('user', 'parent_id', 'content', 'timestamp')
-    rows = [[x.strftime("%Y-%m-%d %H:%M") if isinstance(x, datetime.datetime) else x for x in row] for row in rows ]
-    for row in rows:
-        row_num += 1
-        for col_num in range(len(row)):
-            ws.write(row_num, col_num, row[col_num], font_style)
+#     columns = ['user', 'parent_id', 'content', 'timestamp']
 
-    wb.save(response)
+#     for col_num in range(len(columns)):
+#         ws.write(row_num, col_num, columns[col_num], font_style) # at 0 row 0 column 
 
-    return response
+#     # Sheet body, remaining rows
+#     font_style = xlwt.XFStyle()
+
+#     rows = Comment.objects.all().values_list('user', 'parent_id', 'content', 'timestamp')
+#     rows = [[x.strftime("%Y-%m-%d %H:%M") if isinstance(x, datetime.datetime) else x for x in row] for row in rows ]
+#     for row in rows:
+#         row_num += 1
+#         for col_num in range(len(row)):
+#             ws.write(row_num, col_num, row[col_num], font_style)
+
+#     wb.save(response)
+
+#     return response

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+<div class="container">
+    <div class="row">
+        <div class="col-6 offset-md-2">
+            {%block content%}
+            <h1 class="mb-5">Posts</h1>
+            {% for post in object_list %}
+            <div class="card">
+                <div class="card-header">
+                    {{ post.date_pub }}
+                </div>
+                <div class="card-body">
+                  <h5 class="card-title">{{ post.title }}</h5>
+                  <p class="card-text">{{ post.body }}</p>
+                  <a href="{% url 'posts:post-detail' slug=post.slug %}" class="btn btn-primary">Detail</a>
+                </div>
+              </div>
+              {% endfor %}
+            {% endblock %}
+        </div>
+    </div>
+</div> 
