@@ -2,18 +2,28 @@
 <div class="container">
     <div class="row">
         <div class="col-6 offset-md-2">
-            {%block content%}
+            {% block content %}
             <h1 class="mb-5">Post Detail</h1>
-                {{ object.date_pub }}
-                {{ object.title }}
-                {{ object.body }}
+            
+                <p>{{ object.date_pub }}</p>
+                <p>{{ object.title }}</p>
+                <p>{{ object.body }}</p>
+                
                 <form method="post" action=".">
                     {% csrf_token %}
-                    <h3>Add a comment</h3>
-                    {{ comment_form.as_p }}
-                    <input type="hidden" name="entry" value="{{ object.pk }}">
-                    <p><input type="submit"></p>
+                    <h3>Добавить комментарий</h3>
+                    
+                    
+                        {{ form.as_p }}
+                    
+                    <p class='mt-3'><input type="submit" value='Оставить комментарий'></p>
                 </form>
+                {% for comment in comments %}
+                <p>Comment created by: {{ comment.user }}</p>
+                    <p>{{ comment.content }}</p>
+                <p>Date: {{ comment.timestamp|date }}</p>
+                    <hr>
+                {% endfor %}
             {% endblock %}
         </div>
     </div>

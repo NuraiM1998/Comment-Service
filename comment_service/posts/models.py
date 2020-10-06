@@ -1,12 +1,10 @@
 from django.db import models
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from polymorphic.models import PolymorphicModel
+from comments.models import Comment
 
-User = get_user_model()
 
-class Post(PolymorphicModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_post', verbose_name='Пользователь')
+class Post(Comment):
     title = models.CharField(max_length=150, verbose_name='Название поста')
     slug = models.SlugField(max_length=150, verbose_name='Слаг поста')
     body = models.TextField(blank=True, verbose_name='Описание поста')
