@@ -6,7 +6,7 @@ from datetime import datetime
 from django.http import Http404
 from django.utils import timezone
 from django.views import View
-from django.views.generic.list import ListView
+from django.views.generic.list import ListView, MultipleObjectMixin
 from django.views.generic.detail import DetailView
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic.edit import CreateView, FormView, FormMixin
@@ -22,16 +22,18 @@ class PostList(ListView):
         return Post.objects.order_by('date_pub').reverse()
 
 
-class PostDetail(DetailView, FormMixin):
+class PostDetail(DetailView, FormMixin, MultipleObjectMixin):
     model = Post
     template_name = 'post_detail.html'
     form_class = CommentForm
     queryset = Post.objects.filter(date_pub__year__gte=2020)
+    paginate_by = 2
     success_url = '/'
 
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        object_list = Comment.objects.all()
+        context = super().get_context_data(object_list=object_list, **kwargs)
         context['form'] = self.form_class
         context['comments'] = Comment.objects.all()
         return context
