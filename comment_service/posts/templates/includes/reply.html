@@ -1,0 +1,14 @@
+<div class="replied-comments container mt-2">
+    {% for reply in comment.replies.all %}
+        {{ reply.content }}
+        {{ reply.user }}
+    {% endfor %}
+    <div class="form-group row">
+        <form method="post" action=".">
+            {% csrf_token %}
+            <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                {{ form.as_p }}
+            <p class='mt-3'><input type="submit" value='Ответить'></p>
+        </form>
+    </div>
+</div>
