@@ -1,12 +1,23 @@
-from comments.models import Comment
+'''Форма комментариев'''
 from django import forms
-from django.forms import ModelForm, HiddenInput
-
+from comments.models import Comment
 
 
 class CommentForm(forms.ModelForm):
-    content = forms.CharField(label='', widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Ответить', 'rows': '4', 'cols': '50'}))
+    '''Форма коментария'''
+    content = forms.CharField(
+                            label='',
+                            widget=forms.Textarea(
+                                attrs={
+                                    'class': 'form-control',
+                                    'placeholder': 'Ответить',
+                                    'rows': '4',
+                                    'cols': '50'
+                                    }
+                                    )
+                                    )
     class Meta:
+        '''Объявление полей'''
         model = Comment
         fields = [
             'content', 'reply'
