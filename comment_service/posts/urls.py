@@ -1,5 +1,6 @@
-from django.urls import path, include
-from .views import *
+''' Пути к постам и коментам '''
+from django.urls import path
+from .views import PostList, PostDetail
 
 app_name='posts'
 urlpatterns = [

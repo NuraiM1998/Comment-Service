@@ -13,8 +13,9 @@ from django.shortcuts import redirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView, MultipleObjectMixin
 from django.views.generic.edit import FormView
+from django.http import JsonResponse
 from comments.models import Comment
-from .forms import CommentForm
+from comments.forms import CommentForm
 from .models import Post
 
 
@@ -84,6 +85,14 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
 
         if form.is_valid():
             self.object = self.get_object()
+            content = form.save(commit=False)
+            content.user =  self.request.user
+            content.content = form.cleaned_data['content']
+            content.reply = form.cleaned_data['reply']
+            comment_qs = None
+            if content.reply:
+                comment_qs = Comment.objects.get(id=content.reply.id)
+            content.save()
             return self.form_valid(form)
         else:
             self.object = self.get_object()
@@ -94,17 +103,13 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
 
 
     def form_valid(self, form):
-        content = form.save(commit=False)
-        content.user =  self.request.user
-        content.content = form.cleaned_data['content']
-        content.reply = form.cleaned_data['reply']
-        comment_qs = None
-        if content.reply:
-            comment_qs = Comment.objects.get(id=content.reply.id)
-        content.save()
         form.save()
         return redirect(reverse('posts:post-list'))
 
 
     def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
+        response = super().form_invalid(form)
+        if self.request.accepts('text/html'):
+            return response
+        else:
+            return JsonResponse(form.errors, status=400)
