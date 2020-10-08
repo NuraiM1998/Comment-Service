@@ -24,7 +24,7 @@ class CommentForm(forms.ModelForm):
         '''Объявление полей'''
         model = Comment
         fields = [
-            'content', 'reply'
+            'content'
         ]
         widgets = {
             'content': forms.Textarea(attrs={'class': 'form-control',}),

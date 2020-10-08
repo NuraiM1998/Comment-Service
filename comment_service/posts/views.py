@@ -29,10 +29,6 @@ class PostList(ListView):
         return Post.objects.order_by('date_pub').reverse()
 
 
-def foo():
-    print('bar')
-    return '/'
-
 class PostDetail(DetailView, FormView):
     """
     один объект Post,
@@ -42,7 +38,8 @@ class PostDetail(DetailView, FormView):
     model = Post
     template_name = 'post_detail.html'
     form_class = CommentForm
-    success_url = reverse_lazy
+    success_url = reverse_lazy('posts:list')
+    context_object_name = 'posts'
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -52,4 +49,4 @@ class PostDetail(DetailView, FormView):
 
     def form_valid(self, form):
         form.save()
-        return redirect(reverse('posts:post-list'))
+        return redirect(self.success_url)

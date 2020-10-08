@@ -19,9 +19,11 @@ class Post(models.Model):
         """Путь к одному объекту модели Post"""
         return reverse('posts:post-detail', kwargs={'slug': self.slug})
 
-    def get_comments(self):
-        print(dir(Post.objects))
-        return []
+
+    # @property
+    # def get_comments(self):
+    #     return comments.Comment.objects.all()
+
 
     def __str__(self):
         """Отображение название объекта"""
