@@ -1,7 +1,8 @@
 <div class="replied-comments container mt-2">
     {% for reply in comment.replies.all %}
-        {{ reply.content }}
-        {{ reply.user }}
+        <p>{{ reply.content }}</p>
+        <p>{{ reply.user }}</p>
+        <hr>
     {% endfor %}
     <div class="form-group row">
         <form method="post" action=".">

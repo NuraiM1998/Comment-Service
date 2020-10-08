@@ -8,7 +8,7 @@ class PostDetail, где будет
 и список комментариев с вложенностью
 и пагинацией
 """
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView, MultipleObjectMixin
@@ -29,7 +29,11 @@ class PostList(ListView):
         return Post.objects.order_by('date_pub').reverse()
 
 
-class PostDetail(DetailView, FormView, MultipleObjectMixin):
+def foo():
+    print('bar')
+    return '/'
+
+class PostDetail(DetailView, FormView):
     """
     один объект Post,
     и список комментариев с вложенностью
@@ -38,78 +42,14 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
     model = Post
     template_name = 'post_detail.html'
     form_class = CommentForm
-    queryset = Post.objects.filter(date_pub__year__gte=2020)
-    paginate_by = 2
-    success_url = '/'
-    prefix = None
-    initial = {}
-
-
-    def get_context_data(self, **kwargs):
-        object_list = Comment.objects.all()
-        context = super().get_context_data(object_list=object_list,**kwargs)
-        context['form'] = self.form_class
-        context['comments'] = Comment.objects.all()
-        return context
-
-
-    def get_initial(self):
-        return self.initial.copy()
-
-
-    def get_prefix(self):
-        return self.prefix
-
+    success_url = reverse_lazy
 
     def get_form_kwargs(self):
-        '''
-        Return the keyword arguments
-        for instantiating
-        the form
-        '''
-        kwargs = {
-            'initial': self.get_initial(),
-            'prefix': self.get_prefix(),
-        }
-        if self.request.method in ('POST', 'PUT'):
-            kwargs.update({
-                'data': self.request.POST,
-                'files': self.request.FILES,
-                'user': self.request.user
-            })
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
         return kwargs
-
-
-    def post(self, request, *args, **kwargs):
-        form = CommentForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            self.object = self.get_object()
-            content = form.save(commit=False)
-            content.user =  self.request.user
-            content.content = form.cleaned_data['content']
-            content.reply = form.cleaned_data['reply']
-            comment_qs = None
-            if content.reply:
-                comment_qs = Comment.objects.get(id=content.reply.id)
-            content.save()
-            return self.form_valid(form)
-        else:
-            self.object = self.get_object()
-            object_list = Comment.objects.all()
-            context = super().get_context_data(object_list=object_list, **kwargs)
-            context['form'] = form
-            return self.form_invalid(form)
 
 
     def form_valid(self, form):
         form.save()
         return redirect(reverse('posts:post-list'))
-
-
-    def form_invalid(self, form):
-        response = super().form_invalid(form)
-        if self.request.accepts('text/html'):
-            return response
-        else:
-            return JsonResponse(form.errors, status=400)

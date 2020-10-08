@@ -5,17 +5,21 @@ from comments.models import Comment
 
 class CommentForm(forms.ModelForm):
     '''Форма коментария'''
-    content = forms.CharField(
-                            label='',
-                            widget=forms.Textarea(
-                                attrs={
-                                    'class': 'form-control',
-                                    'placeholder': 'Ответить',
-                                    'rows': '4',
-                                    'cols': '50'
-                                    }
-                                    )
-                                    )
+    
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        comment = super().save(commit=False)
+        comment.user = self.user
+        
+        if commit:
+            comment.save()
+        
+        return comment
+
+
     class Meta:
         '''Объявление полей'''
         model = Comment
@@ -23,5 +27,5 @@ class CommentForm(forms.ModelForm):
             'content', 'reply'
         ]
         widgets = {
-        'content': forms.Textarea(attrs={'class': 'form-control',}),
-       }
+            'content': forms.Textarea(attrs={'class': 'form-control',}),
+        }

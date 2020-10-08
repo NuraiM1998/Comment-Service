@@ -2,10 +2,10 @@
 <div class="container">
     <div class="row">
         <div class="col-6 offset-md-2">
-            {%block content%}
-            <h1 class="mb-5">Posts</h1>
+            {% block content %}
+            <h1 class="mt-3">Posts</h1>
             {% for post in object_list %}
-            <div class="card">
+            <div class="card mt-3">
                 <div class="card-header">
                     {{ post.date_pub }}
                 </div>

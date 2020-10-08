@@ -15,18 +15,17 @@
                         {{ form.as_p }}
                     <p class='mt-3'><input type="submit" value='Оставить комментарий'></p>
                 </form>
-                {% for comment in object_list %}
+                {% for comment in object.get_comments %}
                     <p>Comment created by: {{ comment.user }}</p>
                     <p>{{ comment.content }}</p>
                     <p>Date: {{ comment.timestamp|date }}</p>
                     <hr>
-
-                    {% include 'includes/reply.html' with object_list=comment.replies.all%}
                 {% endfor %}
 
                 {% if is_paginated %}
                     {% include 'includes/pagination.html'%}
                 {% endif %}
+                <div class="mb-4"></div>
             {% endblock %}
         </div>
     </div>

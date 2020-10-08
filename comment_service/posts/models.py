@@ -1,10 +1,9 @@
 """Модель Post которая наследует поля Comment"""
 from django.db import models
 from django.urls import reverse
-from comments.models import Comment
 
 
-class Post(Comment):
+class Post(models.Model):
     """Поля модели Post"""
     title = models.CharField(max_length=150,
                             verbose_name='Название поста')
@@ -20,6 +19,9 @@ class Post(Comment):
         """Путь к одному объекту модели Post"""
         return reverse('posts:post-detail', kwargs={'slug': self.slug})
 
+    def get_comments(self):
+        print(dir(Post.objects))
+        return []
 
     def __str__(self):
         """Отображение название объекта"""
