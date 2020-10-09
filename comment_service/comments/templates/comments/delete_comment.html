@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+                <form method="post" action=".">
+                    {% csrf_token %}
+
+                    <h2>Вы уверены что хотите удалить {{ object.content }}?</h2>
+                    <div class="form-group">
+                        <button class="btn btn-outline-info" type='submit'>Да, удалить</button>
+                        <a class="btn btn-outline-danger" href="{% url 'posts:list' %}">Нет, не удалять</a>  
+                    </div>
+                </form>
+                <div class="mb-4"></div>
+{% endblock %}

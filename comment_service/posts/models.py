@@ -17,7 +17,7 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         """Путь к одному объекту модели Post"""
-        return reverse('posts:post-detail', kwargs={'slug': self.slug})
+        return reverse('posts:detail', kwargs={'slug': self.slug})
 
 
     # @property

@@ -3,80 +3,64 @@ import xlwt
 # from .forms import CommentForm
 import datetime
 from .models import Comment
+from comments.forms import CommentForm
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from djqscsv import render_to_csv_response
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-# def post_detail(request, slug=None): # Comment form with replies
-#     post = get_object_or_404(Post, slug=slug)
-#     comments = Comment.objects.filter_by_instance(post)
 
-#     paginator = Paginator(comments, 2)
-
-#     page_number = request.GET.get('page', 1)
-#     page = paginator.get_page(page_number)
-
-#     is_paginated = page.has_other_pages()
-
-#     if page.has_previous():
-#         prev_url = '?page={}'.format(page.previous_page_number())
-#     else:
-#         prev_url = ''
-
-#     if page.has_next():
-#         next_url = '?page={}'.format(page.next_page_number())
-#     else:
-#         next_url = ''
-
-#     initial_data = {
-#         "content_type": post.get_content_type,
-#         "object_id": post.id
-#     }
-
-#     form = CommentForm(request.POST or None, initial=initial_data)
-#     if form.is_valid():
-#         c_type = form.cleaned_data.get("content_type")
-#         print(c_type)
-#         obj_id = form.cleaned_data.get("object_id")
-#         content_data = form.cleaned_data.get("content")
-#         parent_obj = None
-#         try:
-#             parent_id = int(request.POST.get('parent_id'))
-#         except:
-#             parent_id = None
-#         if parent_id:
-#             parent_qs = Comment.objects.filter(id=parent_id)
-#             if parent_qs.exists() and parent_qs.count() == 1:
-#                 parent_obj = parent_qs.first() 
-#         content_type = ContentType.objects.get(model=c_type)
-#         new_comment, created = Comment.objects.get_or_create(
-#                             user=request.user,
-#                             content_type=content_type,
-#                             object_id=obj_id,
-#                             content=content_data,
-#                             parent=parent_obj
-#                         )
-#         return HttpResponseRedirect(new_comment.content_object.get_absolute_url())
-
-#     comments=post.comments
-
-#     return render(request, 'comments/post_detail.html', context={
-#         'post': post,
-#         'comments': page,
-#         'comment_form': form,
-#         'is_paginated': is_paginated,
-#         'prev_url': prev_url,
-#         'next_url': next_url
-#     })
+class CommentCreate(CreateView):
+    form_class = CommentForm
+    template_name = "comments/create_comment.html"
+    success_url = reverse_lazy('posts:list')
 
 
-# def posts_list(request): # Listing all Post objects
-#     posts = Post.objects.all()
-#     return render(request, 'comments/index.html', {'posts': posts})
+    def get(self, request):
+        form = self.form_class(None)
+        return render(request, self.template_name, {'form':form})
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+
+class CommentUpdate(UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "comments/update_comments.html"
+    success_url = reverse_lazy('posts:list')
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+
+class CommentDelete(DeleteView):
+    model = Comment
+    form_class = CommentForm
+    template_name = "comments/delete_comment.html"
+    success_url = reverse_lazy('posts:list')
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    
+    
+# пока что эти комментарии снизу не уберу
 
 
 # def export(request): # Export Comment objects into csv file 

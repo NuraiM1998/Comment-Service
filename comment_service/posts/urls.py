@@ -5,5 +5,5 @@ from .views import PostList, PostDetail
 app_name='posts'
 urlpatterns = [
     path('', PostList.as_view(), name='list'),
-    path('<slug:slug>/', PostDetail.as_view(), name='post-detail'),
+    path('<slug:slug>/', PostDetail.as_view(), name='detail'),
 ]
