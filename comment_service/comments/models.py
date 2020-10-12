@@ -32,9 +32,9 @@ class Comment(PolymorphicModel):
         ordering = ['-timestamp']
 
 
-    def __str__(self):
-        return f"{self.user}'s comment"
+    # def __str__(self):
+    #     return f"{self.user}'s comment"
 
 
 class PostComment(Comment):
-    record = models.ForeignKey(Post, on_delete=models.CASCADE)
+    record = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')

@@ -1,6 +1,6 @@
 '''Форма комментариев'''
 from django import forms
-from comments.models import Comment
+from comments.models import Comment, PostComment
 
 
 class CommentForm(forms.ModelForm):
@@ -22,7 +22,7 @@ class CommentForm(forms.ModelForm):
 
     class Meta:
         '''Объявление полей'''
-        model = Comment
+        model = PostComment
         fields = [
             'content'
         ]
