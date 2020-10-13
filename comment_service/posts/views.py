@@ -15,6 +15,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView, MultipleObjectMixin
 from django.views.generic.edit import FormView
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 from comments.models import Comment, PostComment
 from comments.forms import CommentForm
 from .models import Post
@@ -51,12 +52,16 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
 
     def get_context_data(self, **kwargs):
         object_list = PostComment.objects.filter(record_id=self.object)
+        paginator = Paginator(object_list, 2)
         context = super().get_context_data(object_list=object_list, **kwargs)
         post = context['object']
+        post_comments = post.comments.filter(reply__isnull=True)
+        current_page = Paginator(post_comments, 2)
+        page = self.request.GET.get('page', 1)
         print(post)
         print(context)
         print(dir(post))
-        context['comments'] = post.comments.filter(reply__isnull=True) # PostComment.objects.filter(record=post)
+        context['comments'] = current_page.page(page) # PostComment.objects.filter(record=post)
         return context
 
 
