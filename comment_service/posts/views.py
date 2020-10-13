@@ -9,6 +9,7 @@ class PostDetail, где будет
 и пагинацией
 """
 from django.urls import reverse, reverse_lazy
+from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView, MultipleObjectMixin
@@ -29,7 +30,7 @@ class PostList(ListView):
         return Post.objects.order_by('date_pub').reverse()
 
 
-class PostDetail(DetailView, FormView):
+class PostDetail(DetailView, FormView, MultipleObjectMixin):
     """
     один объект Post,
     и список комментариев с вложенностью
@@ -39,6 +40,7 @@ class PostDetail(DetailView, FormView):
     template_name = 'post_detail.html'
     form_class = CommentForm
     success_url = reverse_lazy('posts:list')
+    paginate_by = 2
 
 
     def get_form_kwargs(self):
@@ -48,9 +50,13 @@ class PostDetail(DetailView, FormView):
 
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        object_list = PostComment.objects.filter(record_id=self.object)
+        context = super().get_context_data(object_list=object_list, **kwargs)
         post = context['object']
-        context['comments'] = PostComment.objects.filter(record=post)
+        print(post)
+        print(context)
+        print(dir(post))
+        context['comments'] = post.comments.filter(reply__isnull=True) # PostComment.objects.filter(record=post)
         return context
 
 

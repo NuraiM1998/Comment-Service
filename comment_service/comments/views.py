@@ -14,11 +14,11 @@ class CommentCreate(CreateView):
     success_url = reverse_lazy('posts:list')
 
     def form_valid(self, form):
-        print(dir(form))
         comment = form.instance
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
         comment.record = post
         return super().form_valid(form)
+
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
