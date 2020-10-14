@@ -1,34 +1,47 @@
-from .models import Comment, Post
+'''Testing Comments'''
 from datetime import datetime
 from django.urls import reverse
-from django.test import TestCase, Client
-from django.contrib.auth import get_user_model
+from django.test import TestCase
+from django.contrib.auth.models import User
+from .models import Comment
 
-User = get_user_model()
-
-class TestPostModel(TestCase):
-    def setUp(self):
-        user = User.objects.create_user(username='test_user', password='test12345')
-        self.title = 'Test Title'
-        self.slug = 'test-slug'
-        self.body = 'Test Body'
-        self.date_pub = datetime.now()
-        self.test_post = Post.objects.create(user=user, title=self.title, slug=self.slug, body=self.body, date_pub=self.date_pub)
-
-    def test_post_detail_page(self):
-        # response = self.client.get('blog/posts/'+str(self.test_post.slug)+'/')
-        response = self.client.get(reverse('comments:post_detail', args=[self.test_post.slug]))
-        self.assertEquals(response.status_code, 200)
-        self.assertContains(response, self.test_post.title)
 
 class TestCommentModel(TestCase):
+    '''Testing Comment model'''
     def setUp(self):
-        user = User.objects.create_user(username='test_user', password='test12345')
+        user = User.objects.create_user(
+                    username='test_user',
+                    password='test12345'
+                    )
         self.content = 'Test Content'
         self.timestamp = datetime.now()
-        self.test_comment = Comment(user=user, content=self.content, timestamp=self.timestamp)
-        
-    # def test_comment_page(self):
-    #     response = self.client.get(reverse('comments:post_detail', args=[self.test_post.slug]))
-    #     self.assertEquals(response.status_code, 200)
-    #     self.assertContains(response, self.test_comment.content)
+        self.reply = 'Reply Test'
+        self.test_comment = Comment.objects.create(
+                                user=user,
+                                content=self.content,
+                                timestamp=self.timestamp
+                                )
+
+
+    def test_comment_create_page(self):
+        '''Тест наличия страницы comments/<int:post_id>/create/>'''
+        response = self.client.get(reverse('comments:create', args=[self.test_comment.id]))
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_comment_update_page(self):
+        '''Тест наличия страницы comments/<int:pk>/update/>'''
+        response = self.client.get(reverse('comments:update', args=[self.test_comment.id]))
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_comment_delete_page(self):
+        '''Тест наличия страницы comments/<int:pk>/delete/>'''
+        response = self.client.get(reverse('comments:delete', args=[self.test_comment.id]))
+        self.assertEqual(response.status_code, 200)
+
+
+    def test_comment_reply_page(self):
+        '''Тест наличия страницы comments/<int:comment_id>/reply/>'''
+        response = self.client.get(reverse('comments:reply', args=[self.test_comment.id]))
+        self.assertEqual(response.status_code, 200)
