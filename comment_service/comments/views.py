@@ -2,14 +2,14 @@
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from comments.forms import CommentForm
+from comments.forms import CommentForm, PostCommentForm
 from .models import Comment, PostComment
 from posts.models import Post
 
 
 class CommentCreate(CreateView):
     '''Добавление комментариев'''
-    form_class = CommentForm
+    form_class = PostCommentForm
     template_name = "comments/create_comment.html"
     success_url = reverse_lazy('posts:list')
 
@@ -29,7 +29,7 @@ class CommentCreate(CreateView):
 class CommentUpdate(UpdateView):
     '''Редактирование комментариев'''
     model = Comment
-    form_class = CommentForm
+    form_class = PostCommentForm
     template_name = "comments/update_comments.html"
     success_url = reverse_lazy('posts:list')
 
@@ -45,3 +45,23 @@ class CommentDelete(DeleteView):
     model = Comment
     template_name = "comments/delete_comment.html"
     success_url = reverse_lazy('posts:list')
+
+
+class CommentReply(CreateView):
+    '''Добавление ответов на комментарии'''
+    form_class = CommentForm
+    template_name = "comments/reply_comment.html"
+    success_url = reverse_lazy('posts:list')
+
+
+    def form_valid(self, form):
+        comment = form.instance
+        parent_comment = get_object_or_404(Comment, pk=self.kwargs.get('comment_id'))
+        comment.reply = parent_comment  
+        return super().form_valid(form)
+
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs

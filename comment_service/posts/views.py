@@ -17,7 +17,7 @@ from django.views.generic.edit import FormView
 from django.http import JsonResponse
 from django.core.paginator import Paginator
 from comments.models import Comment, PostComment
-from comments.forms import CommentForm
+from comments.forms import CommentForm, PostCommentForm
 from .models import Post
 
 
@@ -39,9 +39,9 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
     """
     model = Post
     template_name = 'post_detail.html'
-    form_class = CommentForm
+    form_class = PostCommentForm
     success_url = reverse_lazy('posts:list')
-    paginate_by = 2
+    paginate_by = 3
 
 
     def get_form_kwargs(self):
@@ -52,15 +52,13 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
 
     def get_context_data(self, **kwargs):
         object_list = PostComment.objects.filter(record_id=self.object)
-        paginator = Paginator(object_list, 2)
         context = super().get_context_data(object_list=object_list, **kwargs)
         post = context['object']
         post_comments = post.comments.filter(reply__isnull=True)
-        current_page = Paginator(post_comments, 2)
+        current_page = Paginator(post_comments, 3)
         page = self.request.GET.get('page', 1)
         print(post)
-        print(context)
-        print(dir(post))
+
         context['comments'] = current_page.page(page) # PostComment.objects.filter(record=post)
         return context
 
