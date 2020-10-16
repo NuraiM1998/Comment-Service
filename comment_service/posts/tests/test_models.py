@@ -1,26 +1,16 @@
 '''Testing Post Model'''
-from datetime import datetime
 from django.urls import reverse
 from django.test import TestCase
-from posts.models import Post
+from . import factories
 
 
 class TestPostModel(TestCase):
     '''Testing Post model'''
-    def setUp(self):
-        self.title = 'Test Title'
-        self.slug = 'test-slug'
-        self.body = 'Test Body'
-        self.date_pub = datetime.now()
-        self.test_post = Post.objects.create(
-                            title=self.title,
-                            slug=self.slug,
-                            body=self.body,
-                            date_pub=self.date_pub
-                            )
+
 
     def test_post_detail_page(self):
-        '''Тест наличия страницы comments/<slug:slug>/'''
-        response = self.client.get(reverse('posts:detail', args=[self.test_post.slug]))
+        '''Тест на наличие страницы comments/<slug:slug>/ и контента в ней'''
+        post = factories.PostFactory()
+        response = self.client.get(reverse('posts:detail', args=[post.slug]))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.test_post.title)
+        self.assertContains(response, post.title)
