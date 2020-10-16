@@ -32,8 +32,8 @@ class TestCommentModel(TestCase):
     def test_comment_create_reply_page(self):
         '''Тест наличия страницы comments/<int:comment_id>/reply/>'''
         response = self.client.get(reverse('comments:reply', args=[self.comment_reply.id]))
-        self.assertTrue(response.context['view'].form_valid(self.form))
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context['view'].form_valid(self.form))
 
 
     def test_comment_update_page(self):
@@ -57,3 +57,14 @@ class TestCommentModel(TestCase):
     def test_comment_form_is_valid(self):
         form = CommentForm(user=self.comment_reply.user, data=self.form_data)
         self.assertTrue(form.is_valid())
+
+
+    def test_form_saves_values_to_instance_user_on_save(self):
+        comment = self.comment.user
+        comment_form = CommentForm(user = comment, instance=comment, data={'content': 'has_changed'})
+
+        if comment_form.is_valid():
+            comment = comment_form.save()
+            self.assertEqual(self.comment.user, comment)
+        else:
+            self.assertFormError("Comment Form not valid")
