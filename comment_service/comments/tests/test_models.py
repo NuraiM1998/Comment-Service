@@ -6,65 +6,62 @@ from django.contrib.auth.models import User
 from comments.models import Comment, PostComment
 from comments.forms import PostCommentForm, CommentForm
 from . import factories
+import pytest
 
 
+@pytest.mark.parametrize(
+    'user, content, validity',
+    [('me@mail.ru', 'Some content',  True),
+     ('me5@mail.ru', '',  False),
+     (None, None, False),
+     ])
+def test_example_form(db, user, content, validity):
+    comment = factories.CommentFactory()
+    comment_user = comment.user
+    form = CommentForm(user=comment_user, data={
+        'user': user,         
+        'content': content,
+    })
 
-class TestCommentModel(TestCase):
-    '''Testing Comment model'''
-    def setUp(self):
-        self.comment = factories.CommentFactory()
-        self.comment_reply = factories.PostCommentFactory()
-        self.form_data = {
-            'user': self.comment_reply.user,
-        }
-        self.form = PostCommentForm(**self.form_data)
-
-
-    def test_comment_create_page(self):
-        '''Тест наличия страницы comments/<int:post_id>/create/>'''
-        response = self.client.get(reverse('comments:create', args=[self.comment.id]))
-        # print()
-        self.assertTrue(response.context['view'].form_valid(self.form))
-        print(dir(response.context['view']))
-        self.assertEqual(response.status_code, 200)
+    assert form.is_valid() is validity
 
 
-    def test_comment_create_reply_page(self):
-        '''Тест наличия страницы comments/<int:comment_id>/reply/>'''
-        response = self.client.get(reverse('comments:reply', args=[self.comment_reply.id]))
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(response.context['view'].form_valid(self.form))
+def test_comment_update_page(db, client):
+    '''Тест наличия страницы comments/<int:pk>/update/>'''
+    comment = factories.CommentFactory()
+    response = client.get(reverse('comments:update', args=[comment.id]))
+    assert response.status_code == 200
 
 
-    def test_comment_update_page(self):
-        '''Тест наличия страницы comments/<int:pk>/update/>'''
-        response = self.client.get(reverse('comments:update', args=[self.comment.id]))
-        self.assertEqual(response.status_code, 200)
+def test_comment_reply_page(db, client):
+    '''Тест наличия страницы comments/<int:comment_id>/reply/>'''
+    comment = factories.CommentFactory()
+    response = client.get(reverse('comments:reply', args=[comment.id]))
+    assert response.status_code == 200
 
 
-    def test_comment_delete_page(self):
-        '''Тест наличия страницы comments/<int:pk>/delete/>'''
-        response = self.client.get(reverse('comments:delete', args=[self.comment.id]))
-        self.assertEqual(response.status_code, 200)
+def test_comment_delete_page(db, client):
+    '''Тест наличия страницы comments/<int:pk>/delete/>'''
+    comment = factories.CommentFactory()
+    response = client.get(reverse('comments:delete', args=[comment.id]))
+    assert response.status_code == 200
 
 
-    def test_comment_reply_page(self):
-        '''Тест наличия страницы comments/<int:comment_id>/reply/>'''
-        response = self.client.get(reverse('comments:reply', args=[self.comment.id]))
-        self.assertEqual(response.status_code, 200)
+def test_comment_create_reply_page(db, client):
+    '''Тест наличия страницы comments/<int:comment_id>/reply/>'''
+    comment_reply = factories.PostCommentFactory()
+    response = client.get(reverse('comments:reply', args=[comment_reply.id]))
+    assert response.status_code == 200
+    # self.assertTrue(response.context['view'].form_valid(self.form))
 
 
-    def test_comment_form_is_valid(self):
-        form = CommentForm(user=self.comment_reply.user, data=self.form_data)
-        self.assertTrue(form.is_valid())
-
-
-    def test_form_saves_values_to_instance_user_on_save(self):
-        comment = self.comment.user
-        comment_form = CommentForm(user = comment, instance=comment, data={'content': 'has_changed'})
+def test_form_saves_values_to_instance_user_on_save(db):
+        comment = factories.CommentFactory()
+        comment_user = comment.user
+        comment_form = CommentForm(user = comment_user, instance=comment_user, data={'content': 'has_changed'})
 
         if comment_form.is_valid():
             comment = comment_form.save()
-            self.assertEqual(self.comment.user, comment)
+            assert comment_user == comment
         else:
-            self.assertFormError("Comment Form not valid")
+            assert False

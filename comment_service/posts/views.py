@@ -19,6 +19,7 @@ from django.core.paginator import Paginator
 from comments.models import Comment, PostComment
 from comments.forms import CommentForm, PostCommentForm
 from .models import Post
+from comments.forms import NodeForm
 
 
 class PostList(ListView):
@@ -31,7 +32,7 @@ class PostList(ListView):
         return Post.objects.order_by('date_pub').reverse()
 
 
-class PostDetail(DetailView, FormView, MultipleObjectMixin):
+class PostDetail(DetailView):
     """
     один объект Post,
     и список комментариев с вложенностью
@@ -39,7 +40,7 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
     """
     model = Post
     template_name = 'post_detail.html'
-    form_class = PostCommentForm
+    # form_class = PostCommentForm
     success_url = reverse_lazy('posts:list')
     paginate_by = 3
 
@@ -51,15 +52,17 @@ class PostDetail(DetailView, FormView, MultipleObjectMixin):
 
 
     def get_context_data(self, **kwargs):
-        object_list = PostComment.objects.filter(record_id=self.object)
-        context = super().get_context_data(object_list=object_list, **kwargs)
-        post = context['object']
-        post_comments = post.comments.filter(reply__isnull=True)
-        current_page = Paginator(post_comments, 3)
-        page = self.request.GET.get('page', 1)
-        print(post)
+        # object_list = PostComment.objects.filter(record_id=self.object)
+        context = super().get_context_data(**kwargs)
+        # post = context['object']
+        # post_comments = post.comments.filter(reply__isnull=True)
+        # current_page = Paginator(post_comments, 3)
+        # page = self.request.GET.get('page', 1)
+        # print(post)
+        context['comments'] = self.object.comments.all()
+        context['post_comment_form'] = PostCommentForm(user=self.request.user, initial={'user': self.request.user, 'post': self.object})
 
-        context['comments'] = current_page.page(page) # PostComment.objects.filter(record=post)
+        # context['comments'] = current_page.page(page) # PostComment.objects.filter(record=post)
         return context
 
 

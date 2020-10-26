@@ -22,7 +22,7 @@ class CommentFactory(factory.django.DjangoModelFactory):
         model = Comment
 
     user = factory.SubFactory(UserFactory)
-    content = factory.Iterator(['Comment 1', 'Comment 2', 'Comment 3', 'Comment 4'])
+    content = factory.Faker('name')
     timestamp = factory.LazyFunction(datetime.datetime.now)
 
 
@@ -33,3 +33,4 @@ class PostCommentFactory(factory.django.DjangoModelFactory):
 
     user = factory.SubFactory(UserFactory)
     record = factory.SubFactory(PostFactory)
+    

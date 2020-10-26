@@ -2,7 +2,7 @@
 from django.urls import reverse_lazy
 from django.shortcuts import get_object_or_404
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from comments.forms import CommentForm, PostCommentForm
+from comments.forms import CommentForm, PostCommentForm, NodeForm
 from .models import Comment, PostComment
 from posts.models import Post
 
@@ -65,3 +65,9 @@ class CommentReply(CreateView):
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
+
+
+class NodeView(CreateView):
+    form_class = NodeForm
+    template_name = "comments/reply_comment.html"
+    success_url = reverse_lazy('posts:list')
