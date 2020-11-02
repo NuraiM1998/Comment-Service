@@ -1,6 +1,6 @@
 '''Форма комментариев'''
 from django import forms
-from comments.models import Comment, PostComment, Node
+from comments.models import Comment, PostComment
 
 
 class PostCommentForm(forms.ModelForm):
@@ -24,10 +24,12 @@ class PostCommentForm(forms.ModelForm):
         '''Объявление полей'''
         model = PostComment
         fields = [
-            'content',
+            'content', 'parent', 'user', 'record'
         ]
         widgets = {
-            'content': forms.Textarea(attrs={'class': 'form-control',}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'parent': forms.HiddenInput(),
+            'user': forms.HiddenInput(),
         }
         
 
@@ -59,32 +61,18 @@ class CommentForm(forms.ModelForm):
         }
 
 
-class NodeForm(forms.ModelForm):
-    '''Форма коментария'''
-    
-    # def __init__(self, user, *args, **kwargs):
-    #     self.user = user
-    #     super().__init__(*args, **kwargs)
+# class NodeForm(forms.ModelForm):
+#     '''Форма коментария'''
 
-    # def save(self, commit=True):
-    #     comment = super().save(commit=False)
-    #     comment.user = self.user
-        
-    #     if commit:
-    #         comment.save()
-        
-    #     return comment
-
-    # id = forms.CharField(widget=forms.HiddenInput())
-    class Meta:
-        '''Объявление полей'''
-        model = Node
-        fields = [
-            'name', 'parent', 'post', 'user'
-        ]
-        widgets = {
-            'parent': forms.HiddenInput(),
-            'post': forms.HiddenInput(),
-            'user': forms.HiddenInput(),
-        }
+#     class Meta:
+#         '''Объявление полей'''
+#         model = Node
+#         fields = [
+#             'name', 'parent', 'post', 'user'
+#         ]
+#         widgets = {
+#             'parent': forms.HiddenInput(),
+#             'post': forms.HiddenInput(),
+#             'user': forms.HiddenInput(),
+#         }
         

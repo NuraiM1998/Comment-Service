@@ -1,17 +1,45 @@
 {% extends 'base.html' %}
+{% load static %}
 <div class="container">
     <div class="row">
         <div class="col-6 offset-md-2">
             {% block content %}
-            {% for c in comments%}
-                <p>{{ c }}</p>
-                <p>{{ c.depth.depth }}</p>
+            <h1>All Comments</h1>
+                {% for c in comments%}
+                    <p>{{ c }}</p>
+                    <p>{{ c.depth.depth }}</p>
+
+                    {% for reply in c.iterator %}
+                            <p>{{ reply.content }}</p>
+                    {% endfor %}
+                    
                 {% endfor %}
+                <h1>All First-Level Comments</h1>
+                {% for comment in top_comments %}
+                    <p><a href="{% url 'posts:subcomments' parentcomment_id=comment.id %}" id="top-comment">{{ comment }}</a></p>
+                    <ul id='children'>
+                    </ul>
+                {% endfor %}
+                <h1>Children</h1>
+                {% for sub in sub_child %}
+                    {{sub}}
+                {% endfor %}
+
             
             <hr>
-            <p>{{ post_comment_form }}</p>
+            <form action="{% url 'comments:create_com' %}" method="post">
+                <input type="hidden" name="comment_id">
+                <input type="hidden" name="record_id">
+                    {% csrf_token %}
+                    {{ post_comment_form }}
+                <input type="submit" value='Оставить комментарий'>
+            </form>
                 <div class="mb-4"></div>
             {% endblock %}
         </div>
     </div>
 </div> 
+{% block js %}
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="{% static 'js/main.js' %}"></script>
+{% endblock %}

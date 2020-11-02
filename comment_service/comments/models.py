@@ -10,7 +10,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from polymorphic.models import PolymorphicModel
 from posts.models import Post
-from comments.closure import ClosureModel
 
 
 class Comment(PolymorphicModel):
@@ -63,19 +62,19 @@ class PostComment(Comment):
         return self.parents.filter(depth__gt=0).last()
 
 
-class Node(ClosureModel): # пока что не используется(возможно в будущем уберу)
-    user = models.ForeignKey(User, 
-                    on_delete=models.CASCADE, 
-                    related_name='user_nodes', 
-                    null=True, 
-                    verbose_name='Пользователь')
-    name = models.CharField(max_length=20)
-    parent = models.ForeignKey('self', 
-                            on_delete=models.CASCADE, 
-                            related_name='children', 
-                            null=True, 
-                            blank=True)
-    post = models.ForeignKey(Post, 
-                            on_delete=models.CASCADE, 
-                            related_name='nodes', 
-                            null=True)
+# class Node(ClosureModel): # пока что не используется(возможно в будущем уберу)
+#     user = models.ForeignKey(User, 
+#                     on_delete=models.CASCADE, 
+#                     related_name='user_nodes', 
+#                     null=True, 
+#                     verbose_name='Пользователь')
+#     name = models.CharField(max_length=20)
+#     parent = models.ForeignKey('self', 
+#                             on_delete=models.CASCADE, 
+#                             related_name='children', 
+#                             null=True, 
+#                             blank=True)
+#     post = models.ForeignKey(Post, 
+#                             on_delete=models.CASCADE, 
+#                             related_name='nodes', 
+#                             null=True)

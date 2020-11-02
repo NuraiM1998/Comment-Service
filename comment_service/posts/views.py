@@ -16,10 +16,11 @@ from django.views.generic.list import ListView, MultipleObjectMixin
 from django.views.generic.edit import FormView
 from django.http import JsonResponse
 from django.core.paginator import Paginator
+from django.views import View
+from django.core import serializers
 from comments.models import Comment, PostComment
-from comments.forms import CommentForm, PostCommentForm
+from comments.forms import PostCommentForm
 from .models import Post
-from comments.forms import NodeForm
 
 
 class PostList(ListView):
@@ -52,20 +53,33 @@ class PostDetail(DetailView):
 
 
     def get_context_data(self, **kwargs):
-        # object_list = PostComment.objects.filter(record_id=self.object)
         context = super().get_context_data(**kwargs)
-        # post = context['object']
-        # post_comments = post.comments.filter(reply__isnull=True)
-        # current_page = Paginator(post_comments, 3)
-        # page = self.request.GET.get('page', 1)
-        # print(post)
         context['comments'] = self.object.comments.all()
+        context['top_comments'] = self.object.comments.filter(parent__isnull=True)
+        context['sub_child'] = self.object.comments.filter(parent__isnull=False)
         context['post_comment_form'] = PostCommentForm(user=self.request.user, initial={'user': self.request.user, 'post': self.object})
 
-        # context['comments'] = current_page.page(page) # PostComment.objects.filter(record=post)
         return context
 
 
     def form_valid(self, form):
         form.save()
         return redirect(self.success_url)
+
+
+class PostCommentChildren(View):
+
+    model = Post
+    template_name = 'post_detail.html'
+
+
+    def get(self, request, *args, **kwargs):
+        id_ = self.kwargs.get('parentcomment_id')
+        subcomments = request.GET.get('subcomments', None)
+        children = PostComment.objects.filter(parent=id_)
+        
+        data = {
+            'has_children': children.exists(),
+            'children': list(children.values())
+        }
+        return JsonResponse(data)

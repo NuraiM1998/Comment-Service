@@ -5,9 +5,6 @@ from comments.models import PostComment, CommentHierarchy
 
 @receiver(post_save, sender=PostComment)
 def save_hierarchy(sender, instance=None, created=False, **kwargs):
-    print('instance: ', instance)
-    print('instance.parent: ',instance.parent)
-    # print('instance.child: ',instance.child)
     if created:
         self_comment = CommentHierarchy.objects.create( # текущий коммент
                                         parent=instance,
@@ -24,5 +21,3 @@ def save_hierarchy(sender, instance=None, created=False, **kwargs):
                                     parent=node.parent,
                                     child=instance,
                                     depth=node.depth+1)
-                print('node: ', node)
-                print('node.parent: ', node.parent)
