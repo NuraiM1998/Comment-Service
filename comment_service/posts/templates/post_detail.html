@@ -5,29 +5,18 @@
         <div class="col-6 offset-md-2">
             {% block content %}
             <h1>All Comments</h1>
-                {% for c in comments%}
-                    <p>{{ c }}</p>
-                    <p>{{ c.depth.depth }}</p>
-
-                    {% for reply in c.iterator %}
-                            <p>{{ reply.content }}</p>
-                    {% endfor %}
-                    
-                {% endfor %}
+            
                 <h1>All First-Level Comments</h1>
                 {% for comment in top_comments %}
-                    <p><a href="{% url 'posts:subcomments' parentcomment_id=comment.id %}" id="top-comment">{{ comment }}</a></p>
-                    <ul id='children'>
+                    <p><a href="{% url 'posts:subcomments' parentcomment_id=comment.id %}" data-commentid="{{ comment.id }}" data-depth = "{{ comment.depth }}" class="top-comment">{{ comment }} - {{ comment.depth.depth }}</a></p>
+                    <ul class='children-{{ comment.id }}' data-depth = "{{ comment.depth }}">
                     </ul>
                 {% endfor %}
-                <h1>Children</h1>
-                {% for sub in sub_child %}
-                    {{sub}}
-                {% endfor %}
+                
 
             
             <hr>
-            <form action="{% url 'comments:create_com' %}" method="post">
+            <form action="{% url 'comments:create_com' %}" method="post" id="comment_form">
                 <input type="hidden" name="comment_id">
                 <input type="hidden" name="record_id">
                     {% csrf_token %}
@@ -35,11 +24,12 @@
                 <input type="submit" value='Оставить комментарий'>
             </form>
                 <div class="mb-4"></div>
+                <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
             {% endblock %}
         </div>
     </div>
 </div> 
 {% block js %}
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="{% static 'js/jquery.js'%}"></script>
 <script src="{% static 'js/main.js' %}"></script>
 {% endblock %}

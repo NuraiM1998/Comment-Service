@@ -39,11 +39,11 @@ class Comment(PolymorphicModel):
 
 
 class CommentHierarchy(models.Model):
-    parent = models.ForeignKey(Comment, 
+    parent = models.ForeignKey('PostComment', 
                         on_delete=models.SET_NULL, 
                         related_name='children', 
                         null=True)
-    child = models.ForeignKey(Comment, 
+    child = models.ForeignKey('PostComment', 
                         on_delete=models.SET_NULL, 
                         related_name='parents', 
                         null=True)
@@ -52,7 +52,7 @@ class CommentHierarchy(models.Model):
 
 class PostComment(Comment):
     """Комменты которые относятся к посту"""
-    record = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
+    record = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments', blank=True, null=True)
 
     def __str__(self):
         return self.content

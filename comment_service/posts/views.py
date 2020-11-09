@@ -18,7 +18,8 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 from django.views import View
 from django.core import serializers
-from comments.models import Comment, PostComment
+from django.shortcuts import get_object_or_404
+from comments.models import Comment, PostComment, CommentHierarchy
 from comments.forms import PostCommentForm
 from .models import Post
 
@@ -54,10 +55,19 @@ class PostDetail(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['comments'] = self.object.comments.all()
-        context['top_comments'] = self.object.comments.filter(parent__isnull=True)
+        num_visits = self.request.session.get('num_visits', 0)
+        self.request.session['num_visits'] = num_visits + 1
+        context['comments'] = PostComment.objects.all()
+        context['top_comments'] = PostComment.objects.filter(parent__isnull=True)
         context['sub_child'] = self.object.comments.filter(parent__isnull=False)
-        context['post_comment_form'] = PostCommentForm(user=self.request.user, initial={'user': self.request.user, 'post': self.object})
+        context['post_comment_form'] = PostCommentForm(user=self.request.user, initial={'user': self.request.user, 'record': self.object})
+        context['num_visits'] = num_visits
+        depth = [dep for dep in PostComment.objects.filter(parent__isnull=True)]
+        # print(self.object.comments.depth())
+        print('dir', dir(PostComment.objects.filter(parent__isnull=True).filter(parents__depth__gte=0)))
+        
+        # print('dir', dir(self.object.comments.filter(parent__isnull=True)))
+        # print(self.object.comments.filter(parent__isnull=True))
 
         return context
 
@@ -75,9 +85,20 @@ class PostCommentChildren(View):
 
     def get(self, request, *args, **kwargs):
         id_ = self.kwargs.get('parentcomment_id')
-        subcomments = request.GET.get('subcomments', None)
-        children = PostComment.objects.filter(parent=id_)
-        
+        post_comment = get_object_or_404(PostComment, pk=id_)
+        hie = get_object_or_404(CommentHierarchy, pk=id_)
+        # print(hie.parent.content)
+        # print('POST COMMENT', post_comment)
+        # print('POST COMMENT >>>>', post_comment.children.all())
+        # print('POST COMMENT DIR', dir(post_comment.content))
+        children = PostComment.objects.filter(parents__parent=id_)
+        child = [child for child in post_comment.children.all()]
+        # print('depth', post_comment.depth.depth)
+
+
+        # print('Children', dir(child))
+        # print()
+        # print('Children', child)
         data = {
             'has_children': children.exists(),
             'children': list(children.values())

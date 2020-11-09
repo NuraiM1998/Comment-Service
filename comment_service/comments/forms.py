@@ -30,6 +30,7 @@ class PostCommentForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'parent': forms.HiddenInput(),
             'user': forms.HiddenInput(),
+            'record': forms.HiddenInput(),
         }
         
 

@@ -76,8 +76,6 @@ class PostCommentReply(CreateView):
 
     def form_valid(self, form):
         comment = form.instance
-        print(dir(comment))
-        print(comment)
         parent_comment = get_object_or_404(PostComment, pk=self.kwargs.get('postcomment_id'))
         comment.parent = parent_comment  
         return super().form_valid(form)

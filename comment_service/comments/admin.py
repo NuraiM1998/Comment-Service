@@ -7,6 +7,9 @@ from .models import Comment, PostComment, CommentHierarchy
 # class CommentAdmin(ImportExportModelAdmin):
 #     pass
 
+class CommentHierarchyAdmin(admin.ModelAdmin):
+    list_display = ['parent', 'child', 'depth']
+
 admin.site.register(Comment)
 admin.site.register(PostComment)
-admin.site.register(CommentHierarchy)
+admin.site.register(CommentHierarchy, CommentHierarchyAdmin)

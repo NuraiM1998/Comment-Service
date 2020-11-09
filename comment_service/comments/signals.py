@@ -10,9 +10,10 @@ def save_hierarchy(sender, instance=None, created=False, **kwargs):
                                         parent=instance,
                                         child=instance)
         if instance.parent: # если у комента есть родитель
-            parent_hierarchy = CommentHierarchy.objects.filter( # фильтруем родителей которые не вложенны(root)
+            parent_hierarchy = CommentHierarchy.objects.filter( 
                                                     child=instance.parent,
                                                     depth__gt=0)
+            print('Parent Hierarchy', parent_hierarchy)
             CommentHierarchy.objects.create(parent=instance.parent,
                                             child=instance,
                                             depth=1)
